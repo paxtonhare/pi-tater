@@ -4,7 +4,7 @@
  * Replaces pi's startup header with a transparent ANSI Tater Tot banner.
  */
 
-import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import fs from "node:fs";
 import path from "node:path";
 
