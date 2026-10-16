@@ -5,6 +5,7 @@
  */
 
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
+import { truncateToWidth, visibleWidth } from "@earendil-works/pi-tui";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -16,46 +17,10 @@ const BANNER_PATH = path.resolve(
   "taterjudging_ansi_nobg_v2.ansi",
 );
 
-const ANSI_PATTERN =
-  /[\u001B\u009B][[\]()#;?]*(?:(?:(?:[a-zA-Z\d]*(?:;[a-zA-Z\d]*)*)?\u0007)|(?:(?:\d{1,4}(?:;\d{0,4})*)?[\dA-PR-TZcf-nq-uy=><~]))/g;
-
-function withoutAnsi(text: string) {
-  return text.replace(ANSI_PATTERN, "");
-}
-
-function visibleLength(text: string) {
-  return [...withoutAnsi(text)].length;
-}
-
-function truncateAnsiToWidth(text: string, width: number) {
-  if (width <= 0) return "";
-
-  let output = "";
-  let columns = 0;
-  let index = 0;
-
-  while (index < text.length && columns < width) {
-    ANSI_PATTERN.lastIndex = index;
-    const escape = ANSI_PATTERN.exec(text);
-    if (escape && escape.index === index) {
-      output += escape[0];
-      index = ANSI_PATTERN.lastIndex;
-      continue;
-    }
-
-    const char = Array.from(text.slice(index))[0];
-    if (!char) break;
-    output += char;
-    columns += 1;
-    index += char.length;
-  }
-
-  return `${output}${RESET}`;
-}
-
 function centerAnsi(text: string, width: number) {
-  const safeText = truncateAnsiToWidth(text, width);
-  const length = visibleLength(safeText);
+  if (width <= 0) return "";
+  const safeText = `${truncateToWidth(text, width, "")}${RESET}`;
+  const length = visibleWidth(safeText);
   if (length >= width) return safeText;
   return `${" ".repeat(Math.floor((width - length) / 2))}${safeText}`;
 }
